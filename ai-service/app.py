@@ -95,7 +95,13 @@ def check_plagiarism():
         }), 500
 
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', 8000))
-    debug = os.getenv('DEBUG', 'False').lower() == 'true'
+    # Render automatically sets PORT environment variable
+    port = int(os.environ.get('PORT', 8000))
+    debug = os.environ.get('DEBUG', 'False').lower() == 'true'
+    
+    print(f"🚀 Starting Flask app on port {port}")
+    print(f"📡 Host: 0.0.0.0")
+    print(f"🐛 Debug mode: {debug}")
+    
     app.run(host='0.0.0.0', port=port, debug=debug)
 
