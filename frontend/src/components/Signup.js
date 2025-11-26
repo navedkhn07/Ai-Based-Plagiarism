@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { register as registerUser } from '../services/api';
 
 const Signup = ({ onLogin }) => {
   const [formData, setFormData] = useState({
@@ -37,23 +38,11 @@ const Signup = ({ onLogin }) => {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Registration failed');
-      }
+      const data = await registerUser(
+        formData.name,
+        formData.email,
+        formData.password
+      );
 
       // Store token
       localStorage.setItem('token', data.token);
@@ -67,7 +56,13 @@ const Signup = ({ onLogin }) => {
       // Redirect to home
       window.location.href = '/';
     } catch (err) {
-      setError(err.message);
+      const backendError = err.response?.data;
+      const message =
+        (backendError && (backendError.error || backendError.message)) ||
+        (typeof backendError === 'string' ? backendError : null) ||
+        err.message ||
+        'Unable to create account right now';
+      setError(message);
     } finally {
       setLoading(false);
     }

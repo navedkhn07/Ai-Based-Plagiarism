@@ -27,11 +27,20 @@ npm install
 Create a `.env` file in the `backend` directory:
 
 ```env
-MONGODB_URI=mongodb+srv://navedkhn07_db_user:yO6dHEhQaprZPDRm@aibasedplagiarism.nevziui.mongodb.net/
+# ⚠️ SECURITY: Never commit this file to GitHub! Get your MongoDB URI from MongoDB Atlas dashboard.
+MONGODB_URI=your-mongodb-connection-string
 JWT_SECRET=your-secret-key-change-in-production
 PORT=5000
 AI_SERVICE_URL=http://localhost:8000
 ```
+
+**Where to get MongoDB URI:**
+1. Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+2. Navigate to your cluster
+3. Click "Connect"
+4. Choose "Connect your application"
+5. Copy the connection string
+6. Replace `<password>` with your database password
 
 ### 2. AI Service Setup
 

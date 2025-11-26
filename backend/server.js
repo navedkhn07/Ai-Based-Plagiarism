@@ -18,7 +18,13 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // MongoDB connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://navedkhn07_db_user:yO6dHEhQaprZPDRm@aibasedplagiarism.nevziui.mongodb.net/';
+// ⚠️ SECURITY: Never hardcode credentials! Always use environment variables.
+const MONGODB_URI = process.env.MONGODB_URI;
+if (!MONGODB_URI) {
+  console.error('❌ MONGODB_URI environment variable is not set!');
+  console.error('Please set MONGODB_URI in your .env file or environment variables.');
+  process.exit(1);
+}
 
 mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true,

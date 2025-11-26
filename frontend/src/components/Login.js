@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { login as loginUser } from '../services/api';
 
 const Login = ({ onLogin }) => {
   const [formData, setFormData] = useState({
@@ -23,19 +24,7 @@ const Login = ({ onLogin }) => {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Login failed');
-      }
+      const data = await loginUser(formData.email, formData.password);
 
       // Store token
       localStorage.setItem('token', data.token);
@@ -49,7 +38,13 @@ const Login = ({ onLogin }) => {
       // Redirect to home
       window.location.href = '/';
     } catch (err) {
-      setError(err.message);
+      const backendError = err.response?.data;
+      const message =
+        (backendError && (backendError.error || backendError.message)) ||
+        (typeof backendError === 'string' ? backendError : null) ||
+        err.message ||
+        'Unable to sign in right now';
+      setError(message);
     } finally {
       setLoading(false);
     }
