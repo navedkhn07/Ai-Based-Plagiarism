@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 const PlagiarismResults = ({ results }) => {
   const { 
     similarityScore, 
-    plagiarismPercentage, 
     exact_match_percentage = 0,
     partial_match_percentage = 0,
     unique_content_percentage = 0,

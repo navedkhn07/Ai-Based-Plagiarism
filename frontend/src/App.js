@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Login from './components/Login';
 import Signup from './components/Signup';
@@ -144,8 +144,6 @@ function HomePage() {
 
 function App() {
   const [user, setUser] = useState(null);
-  const navigate = useNavigate();
-
   useEffect(() => {
     // Check if user is logged in
     const token = localStorage.getItem('token');
