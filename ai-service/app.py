@@ -9,28 +9,47 @@ app = Flask(__name__)
 CORS(app)
 
 # Initialize the plagiarism detector
-try:
-    print("Initializing Enhanced Plagiarism Detector...")
+# Note: Initialization happens at import time, but we'll handle errors gracefully
+detector = None
+
+def initialize_detector():
+    """Initialize the detector - called lazily or at startup"""
+    global detector
+    if detector is not None:
+        return detector
+    
     try:
-        from enhanced_plagiarism_detector import EnhancedPlagiarismDetector
-        detector = EnhancedPlagiarismDetector()
-        print("✅ Enhanced Plagiarism Detector initialized successfully")
-    except ImportError:
-        # Fallback to basic detector
-        from plagiarism_detector import PlagiarismDetector
-        detector = PlagiarismDetector()
-        print("Plagiarism Detector initialized successfully (basic mode)")
+        print("Initializing Enhanced Plagiarism Detector...")
+        try:
+            from enhanced_plagiarism_detector import EnhancedPlagiarismDetector
+            detector = EnhancedPlagiarismDetector()
+            print("✅ Enhanced Plagiarism Detector initialized successfully")
+        except ImportError:
+            # Fallback to basic detector
+            from plagiarism_detector import PlagiarismDetector
+            detector = PlagiarismDetector()
+            print("Plagiarism Detector initialized successfully (basic mode)")
+    except Exception as e:
+        print(f"⚠️ Failed to initialize Plagiarism Detector: {str(e)}")
+        print("Please ensure all dependencies are installed: pip install -r requirements.txt")
+        import traceback
+        traceback.print_exc()
+        detector = None
+    
+    return detector
+
+# Try to initialize on startup (non-blocking)
+try:
+    initialize_detector()
 except Exception as e:
-    print(f"Failed to initialize Plagiarism Detector: {str(e)}")
-    print("Please ensure all dependencies are installed: pip install -r requirements.txt")
-    import traceback
-    traceback.print_exc()
+    print(f"⚠️ Detector initialization failed, but app will continue: {e}")
     detector = None
 
 @app.route('/health', methods=['GET'])
 def health():
     """Health check endpoint"""
-    if detector is None:
+    current_detector = initialize_detector()
+    if current_detector is None:
         return jsonify({
             'status': 'error',
             'message': 'Plagiarism Detector not initialized',
@@ -40,14 +59,15 @@ def health():
     return jsonify({
         'status': 'ok',
         'message': 'AI Plagiarism Detection Service is running',
-        'model_loaded': detector.is_model_loaded()
+        'model_loaded': current_detector.is_model_loaded() if hasattr(current_detector, 'is_model_loaded') else True
     })
 
 @app.route('/check', methods=['POST'])
 def check_plagiarism():
     """Check text for plagiarism"""
     try:
-        if detector is None:
+        current_detector = initialize_detector()
+        if current_detector is None:
             return jsonify({
                 'error': 'Plagiarism Detector not initialized. Please check the server logs.'
             }), 503
@@ -73,7 +93,7 @@ def check_plagiarism():
         print(f"Text length: {len(text)} characters")
         print(f"{'='*60}\n")
         
-        result = detector.detect_plagiarism(text)
+        result = current_detector.detect_plagiarism(text)
         
         elapsed_time = time.time() - start_time
         print(f"\n{'='*60}")
