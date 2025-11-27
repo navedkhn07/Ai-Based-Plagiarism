@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+USE_SIMPLE_DETECTOR = os.getenv('USE_SIMPLE_DETECTOR', 'false').lower() == 'true'
+
 app = Flask(__name__)
 CORS(app)
 
@@ -19,16 +21,22 @@ def initialize_detector():
         return detector
     
     try:
-        print("Initializing Enhanced Plagiarism Detector...")
-        try:
-            from enhanced_plagiarism_detector import EnhancedPlagiarismDetector
-            detector = EnhancedPlagiarismDetector()
-            print("✅ Enhanced Plagiarism Detector initialized successfully")
-        except ImportError:
-            # Fallback to basic detector
-            from plagiarism_detector import PlagiarismDetector
-            detector = PlagiarismDetector()
-            print("Plagiarism Detector initialized successfully (basic mode)")
+        if USE_SIMPLE_DETECTOR:
+            print("Initializing Simple Plagiarism Detector (low-memory mode)...")
+            from simple_plagiarism_detector import SimplePlagiarismDetector
+            detector = SimplePlagiarismDetector()
+            print("✅ Simple detector initialized")
+        else:
+            print("Initializing Enhanced Plagiarism Detector...")
+            try:
+                from enhanced_plagiarism_detector import EnhancedPlagiarismDetector
+                detector = EnhancedPlagiarismDetector()
+                print("✅ Enhanced Plagiarism Detector initialized successfully")
+            except ImportError:
+                # Fallback to basic detector
+                from plagiarism_detector import PlagiarismDetector
+                detector = PlagiarismDetector()
+                print("Plagiarism Detector initialized successfully (basic mode)")
     except Exception as e:
         print(f"⚠️ Failed to initialize Plagiarism Detector: {str(e)}")
         print("Please ensure all dependencies are installed: pip install -r requirements.txt")
